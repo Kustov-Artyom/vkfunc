@@ -24,7 +24,7 @@ export const App = () => {
     <SplitLayout popout={popout}>
       <SplitCol>
         <View activePanel={activePanel}>
-          <Home id="home" fetchedUser={fetchedUser} />
+          <Home id="home" />
           <Persik id="persik" />
         </View>
       </SplitCol>
