@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import {
   Panel,
   PanelHeader,
@@ -14,15 +14,19 @@ export interface HomeProps {
 
 export const Home: FC<HomeProps> = ({ id }) => {
   const routeNavigator = useRouteNavigator();
+  const [droppedItems, setDroppedItems] = useState<string[]>([]);
 
   const { setNodeRef: setDropNodeRef } = useDroppable({
     id: 'droppable',
   });
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const { over } = event;
+    const { active, over } = event;
     if (over && over.id === 'droppable') {
-      alert(`Элемент брошен в область!`);
+      // Добавляем элемент в область droppable, если его там еще нет
+      if (!droppedItems.includes(active.id as string)) {
+        setDroppedItems((prevItems) => [...prevItems, active.id as string]);
+      }
     }
   };
 
@@ -30,7 +34,7 @@ export const Home: FC<HomeProps> = ({ id }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
       id,
     });
-  
+
     const style = {
       transform: CSS.Translate.toString(transform),
       padding: '10px',
@@ -38,8 +42,9 @@ export const Home: FC<HomeProps> = ({ id }) => {
       border: '1px solid #ccc',
       backgroundColor: '#f0f0f0',
       cursor: 'grab',
+      color: 'black'
     };
-  
+
     return (
       <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
         Перетаскиваемый элемент {id}
@@ -55,8 +60,9 @@ export const Home: FC<HomeProps> = ({ id }) => {
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '20px' }}>
             <div>
               <h3>Перетаскиваемые элементы</h3>
-              <DraggableItem id="draggable1" />
-              <DraggableItem id="draggable2" />
+              {/* Отображаем draggable элементы только если они не в области droppable */}
+              {!droppedItems.includes('draggable1') && <DraggableItem id="draggable1" />}
+              {!droppedItems.includes('draggable2') && <DraggableItem id="draggable2" />}
             </div>
             <div
               ref={setDropNodeRef}
@@ -67,9 +73,24 @@ export const Home: FC<HomeProps> = ({ id }) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                flexDirection: 'column',
               }}
             >
               <h3>Область для броска</h3>
+              {/* Отображаем элементы, которые были перемещены в droppable */}
+              {droppedItems.map((itemId) => (
+                <div
+                  key={itemId}
+                  style={{
+                    padding: '10px',
+                    margin: '10px',
+                    border: '1px solid #ccc',
+                    backgroundColor: '#f0f0f0',
+                  }}
+                >
+                  Перетаскиваемый элемент {itemId}
+                </div>
+              ))}
             </div>
           </div>
         </DndContext>
