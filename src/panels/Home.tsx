@@ -1,100 +1,149 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect, useCallback } from 'react';
 import {
-  Panel,
-  PanelHeader,
-  Group,
-} from '@vkontakte/vkui';
-import { useRouteNavigator } from '@vkontakte/vk-mini-apps-router';
-import { useDroppable, useDraggable, DndContext, DragEndEvent } from '@dnd-kit/core';
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  useDroppable,
+  useDraggable,
+} from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import './Home.css';
 
-export interface HomeProps {
+type ItemType = 'yellow' | 'black';
+
+interface DraggableItem {
   id: string;
+  type: ItemType;
+  img: string;
 }
 
-export const Home: FC<HomeProps> = ({ id }) => {
-  const routeNavigator = useRouteNavigator();
-  const [droppedItems, setDroppedItems] = useState<string[]>([]);
+const initialItems: DraggableItem[] = [
+  { id: '1', type: 'black', img: 'src/assets/items/1.jpg' },
+  { id: '2', type: 'black', img: 'src/assets/items/4.jpg' },
+  { id: '3', type: 'yellow', img: 'src/assets/items/3.jpg' },
+  { id: '4', type: 'black', img: 'src/assets/items/2.jpg' },
+  { id: '5', type: 'yellow', img: 'src/assets/items/5.jpg' },
+  { id: '6', type: 'yellow', img: 'src/assets/items/6.jpg' },
+];
 
-  const { setNodeRef: setDropNodeRef } = useDroppable({
-    id: 'droppable',
-  });
+export const Home: FC = () => {
+  const [time, setTime] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [items, setItems] = useState(initialItems);
+  const [yellowBasket, setYellowBasket] = useState<DraggableItem[]>([]);
+  const [blackBasket, setBlackBasket] = useState<DraggableItem[]>([]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  // Таймер
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!isPaused) setTime((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isPaused]);
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  }, []);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
-    if (over && over.id === 'droppable') {
-      // Добавляем элемент в область droppable, если его там еще нет
-      if (!droppedItems.includes(active.id as string)) {
-        setDroppedItems((prevItems) => [...prevItems, active.id as string]);
-      }
+    const item = items.find((i) => i.id === active.id);
+    
+    if (!item || !over) return;
+
+    if (over.id === 'yellow-basket' && item.type === 'yellow') {
+      setYellowBasket((prev) => [...prev, item]);
+    } else if (over.id === 'black-basket' && item.type === 'black') {
+      setBlackBasket((prev) => [...prev, item]);
     }
-  };
 
-  const DraggableItem: FC<{ id: string }> = ({ id }) => {
-    const { attributes, listeners, setNodeRef, transform } = useDraggable({
-      id,
-    });
+    setItems((prev) => prev.filter((i) => i.id !== item.id));
+    setActiveId(null);
+  }, [items]);
 
-    const style = {
-      transform: CSS.Translate.toString(transform),
-      padding: '10px',
-      margin: '10px',
-      border: '1px solid #ccc',
-      backgroundColor: '#f0f0f0',
-      cursor: 'grab',
-      color: 'black'
-    };
-
-    return (
-      <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-        Перетаскиваемый элемент {id}
-      </div>
-    );
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
-    <Panel id={id}>
-      <PanelHeader>Главная</PanelHeader>
-      <Group>
-        <DndContext onDragEnd={handleDragEnd}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '20px' }}>
-            <div>
-              <h3>Перетаскиваемые элементы</h3>
-              {/* Отображаем draggable элементы только если они не в области droppable */}
-              {!droppedItems.includes('draggable1') && <DraggableItem id="draggable1" />}
-              {!droppedItems.includes('draggable2') && <DraggableItem id="draggable2" />}
-            </div>
-            <div
-              ref={setDropNodeRef}
-              style={{
-                width: '300px',
-                height: '300px',
-                border: '2px dashed #ccc',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'column',
-              }}
-            >
-              <h3>Область для броска</h3>
-              {/* Отображаем элементы, которые были перемещены в droppable */}
-              {droppedItems.map((itemId) => (
-                <div
-                  key={itemId}
-                  style={{
-                    padding: '10px',
-                    margin: '10px',
-                    border: '1px solid #ccc',
-                    backgroundColor: '#f0f0f0',
-                  }}
-                >
-                  Перетаскиваемый элемент {itemId}
-                </div>
-              ))}
-            </div>
+    <div className="game-container">
+      {/* Шапка с управлением */}
+      <div className="game-header">
+        <button 
+          className="pause-button"
+          onClick={() => setIsPaused(!isPaused)}
+        >
+          {isPaused ? '▶' : '⏸'}
+        </button>
+        <div className="timer">{formatTime(time)}</div>
+        <button className="hint-button">?</button>
+      </div>
+
+      {/* Игровое поле */}
+      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className="game-field">
+          {/* Корзинки */}
+          <Basket type="yellow" items={yellowBasket} />
+          <Basket type="black" items={blackBasket} />
+
+          {/* Доступные предметы */}
+          <div className="items-container">
+            {items.map((item) => (
+              <DraggableItem key={item.id} item={item} />
+            ))}
           </div>
-        </DndContext>
-      </Group>
-    </Panel>
+        </div>
+
+        <DragOverlay>
+          {activeId ? (
+            <img
+              src={items.find((i) => i.id === activeId)?.img}
+              className="dragged-item"
+              alt="item"
+            />
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+    </div>
+  );
+};
+
+const DraggableItem: FC<{ item: DraggableItem }> = ({ item }) => {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: item.id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className="item"
+      style={{ transform: CSS.Translate.toString(transform) }}
+      {...listeners}
+      {...attributes}
+    >
+      <img src={item.img} alt="item" className="item-image" />
+    </div>
+  );
+};
+
+const Basket: FC<{ type: ItemType; items: DraggableItem[] }> = ({ type, items }) => {
+  const { setNodeRef } = useDroppable({ id: `${type}-basket` });
+  const basketImg = type === 'yellow' 
+    ? 'src/assets/baskets/yellow-basket.png' 
+    : 'src/assets/baskets/black-basket.png';
+
+  return (
+    <div ref={setNodeRef} className={`basket ${type}-basket`}>
+      <img src={basketImg} alt={`${type} basket`} className="basket-image" />
+      <div className="items-in-basket">
+        {items.map((item) => (
+          <img key={item.id} src={item.img} alt="item" className="item-in-basket" />
+        ))}
+      </div>
+    </div>
   );
 };
