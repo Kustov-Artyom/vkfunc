@@ -14,7 +14,7 @@ import { SecondLevel } from '../main_panels/levels/second_lvl/second';
 import { FirstLevel } from '../main_panels/levels/first_lvl/first';
 
 export const Home: FC = () => {
-  const [activePanel, setActivePanel] = useState('mainPanel');
+  const [activePanel, setActivePanel] = useState('first_lvl');
 
 
   return (
