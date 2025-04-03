@@ -4,7 +4,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: url('src/assets/lib/others/game-background.jpg') no-repeat center center fixed;
+    background: url('src/assets/lib/backgrounds/game-background.jpg') no-repeat center center fixed;
     background-size: cover;
     padding: 20px;
   }

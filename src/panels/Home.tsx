@@ -2,12 +2,6 @@ import { FC, useState } from 'react';
 import {
   Panel,
   PanelHeader,
-  Header,
-  Button,
-  Group,
-  Cell,
-  Div,
-  Avatar,
   NavIdProps,
   View,
 } from '@vkontakte/vkui';
@@ -22,8 +16,8 @@ export interface HomeProps extends NavIdProps {
   fetchedUser?: UserInfo;
 }
 
-export const Home: FC<HomeProps> = ({ id, fetchedUser }) => {
-  //const { photo_200, city, first_name, last_name } = { ...fetchedUser };
+export const Home: FC<HomeProps> = ({ id, fetchedUser}) => {
+  const { photo_200, city, first_name, last_name } = { ...fetchedUser };
   const routeNavigator = useRouteNavigator();
   const [activePanel, setActivePanel] = useState('first_lvl')
 

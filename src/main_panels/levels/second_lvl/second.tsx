@@ -19,12 +19,12 @@ interface DraggableItem {
 }
 
 const initialItems: DraggableItem[] = [
-  { id: '1', type: 'black', img: 'src/assets/lib/items/1.jpg' },
-  { id: '2', type: 'black', img: 'src/assets/lib/items/4.jpg' },
-  { id: '3', type: 'yellow', img: 'src/assets/lib/items/3.jpg' },
-  { id: '4', type: 'black', img: 'src/assets/lib/items/2.jpg' },
-  { id: '5', type: 'yellow', img: 'src/assets/lib/items/5.jpg' },
-  { id: '6', type: 'yellow', img: 'src/assets/lib/items/6.jpg' },
+  { id: '1', type: 'black', img: 'src/assets/lib/items/hat.png' },
+  { id: '2', type: 'black', img: 'src/assets/lib/items/flag.png' },
+  { id: '3', type: 'yellow', img: 'src/assets/lib/items/gold.png' },
+  { id: '4', type: 'black', img: 'src/assets/lib/items/hook.png' },
+  { id: '5', type: 'yellow', img: 'src/assets/lib/items/bananas.png' },
+  { id: '6', type: 'yellow', img: 'src/assets/lib/items/money.png' },
 ];
 
 export const SecondLevel: FC = () => {
