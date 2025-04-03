@@ -1,5 +1,5 @@
 {
-  "name": "func",
+  "name": "vkfunc",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,14 +13,13 @@
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
-    "@react-spring/web": "^9.7.5",
-    "@vkontakte/icons": "^2.92.0",
+    "@vkontakte/icons": "^3.1.1",
     "@vkontakte/vk-bridge": "^2.13.0",
     "@vkontakte/vk-bridge-react": "^1.0.1",
-    "@vkontakte/vk-mini-apps-router": "^1.4.2",
-    "@vkontakte/vkui": "^6.0.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@vkontakte/vk-mini-apps-router": "^1.7.6",
+    "@vkontakte/vkui": "^7.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
@@ -30,7 +29,7 @@
     "@vitejs/plugin-legacy": "^5.3.1",
     "@vitejs/plugin-react": "^4.2.1",
     "@vkontakte/vk-miniapps-deploy": "^0.1.6",
-    "@vkontakte/vk-tunnel": "^0.2.0",
+    "@vkontakte/vk-tunnel": "^0.2.4",
     "eruda": "^3.0.1",
     "esbuild": "~0.20.0",
     "eslint": "^8.55.0",
