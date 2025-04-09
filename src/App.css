@@ -1,0 +1,98 @@
+/* Убираем scroll на body, если хочешь на всех экранах */
+body, #root {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* чтобы вообще не было скролла */
+}
+
+/* Кнопка крестика */
+.modal-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  background: url('src/assets/close.svg') no-repeat center center;
+  background-size: contain;
+  border: none;
+  cursor: pointer;
+  z-index: 999;
+}
+
+/* Кастомная обертка модалки */
+.custom-modal {
+  position: fixed;
+  z-index: 1000;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-modal-content {
+  position: relative;
+  width: 280px;
+  height: 380px;
+  background-size: cover;
+  background-position: center;
+  padding: 20px;
+  /* Расположим flex-колонку */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Кнопка из макета (градиент, бордюр, тени) */
+.menu-button {
+  width: 80px;
+  height: 48px;
+  font-size: 18px;
+  padding: 10px;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  background-image: linear-gradient(#FFE298, #FEC56C);
+  border: 3px solid #B96E29;
+  color: #954B25;
+  font-weight: bold;
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.325);
+  transition: all 0.3s ease-in-out;
+  margin-bottom: 15px;
+}
+.menu-button:hover {
+  background-image: linear-gradient(#FCF80D, #F99F1E);
+}
+
+.menu-button-yes-no{
+  width: 88px;
+  height: 48px;
+  font-size: 18px;
+  padding: 10px 10px;
+  border-radius: 15px;
+  cursor: pointer;
+  background-image: linear-gradient(#FFE298, #FEC56C);
+  border: 3px solid #B96E29;
+  color: #954B25;
+  font-weight: bold;
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.325);
+  transition: all 0.3s ease-in-out;
+}
+.menu-button-yes-no:hover {
+  background-image: linear-gradient(#FCF80D, #F99F1E);
+}
+
+.container-menu-button-circle{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  height: 120px;
+  width: 200px;
+}
+
+.menu-button-circle{
+  border: none;
+  width: 100px;
+  height: 72px;
+}

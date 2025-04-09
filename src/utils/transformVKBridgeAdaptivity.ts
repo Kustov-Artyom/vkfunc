@@ -1,3 +1,5 @@
+// /src/utils/transformVKBridgeAdaptivity.ts
+
 import {
   type AdaptivityProps,
   getViewWidthByViewportWidth,

@@ -1,0 +1,19 @@
+/* Shop.css */
+.Shop {
+  min-height: calc(100vh - 100px);
+  background: #fffbea;
+  padding: 20px;
+}
+
+.shop-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.shop-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}

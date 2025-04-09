@@ -1,3 +1,4 @@
+// /src/panels/Home.tsx
 import { FC, useState, useEffect, useCallback } from 'react';
 import {
   DndContext,
@@ -8,31 +9,141 @@ import {
   useDraggable,
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { Panel, PanelHeader, View } from '@vkontakte/vkui';
-import { Main } from '../main_panels/main';
-import { SecondLevel } from '../main_panels/levels/second_lvl/second';
-import { FirstLevel } from '../main_panels/levels/first_lvl/first';
+import './Home.css';
+
+type ItemType = 'yellow' | 'black';
+
+interface DraggableItem {
+  id: string;
+  type: ItemType;
+  img: string;
+}
+
+const initialItems: DraggableItem[] = [
+  { id: '1', type: 'black', img: 'src/assets/items/pirate-hat.svg' },
+  { id: '2', type: 'yellow', img: 'src/assets/items/banana.svg' },
+  { id: '3', type: 'black', img: 'src/assets/items/flag.svg' },
+  { id: '4', type: 'yellow', img: 'src/assets/items/money.svg' },
+  { id: '6', type: 'yellow', img: 'src/assets/items/crystal.svg' },
+];
 
 export const Home: FC = () => {
-  const [activePanel, setActivePanel] = useState('first_lvl');
+  const [time, setTime] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [items, setItems] = useState(initialItems);
+  const [yellowBasket, setYellowBasket] = useState<DraggableItem[]>([]);
+  const [blackBasket, setBlackBasket] = useState<DraggableItem[]>([]);
 
+  // Таймер
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!isPaused) setTime((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isPaused]);
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  }, []);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    const item = items.find((i) => i.id === active.id);
+    
+    if (!item || !over) return;
+
+    if (over.id === 'yellow-basket' && item.type === 'yellow') {
+      setYellowBasket((prev) => [...prev, item]);
+    } else if (over.id === 'black-basket' && item.type === 'black') {
+      setBlackBasket((prev) => [...prev, item]);
+    }
+
+    setItems((prev) => prev.filter((i) => i.id !== item.id));
+    setActiveId(null);
+  }, [items]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
-    <View activePanel={activePanel}>
-      <Panel id='mainPanel'>
-        <PanelHeader>Лагуна приключений</PanelHeader>
-        <Main />
-      </Panel>
+    <div className="game-container">
+      {/* Шапка с управлением */}
+      <div className="game-header">
+        <button 
+          className="pause-button"
+          onClick={() => setIsPaused(!isPaused)}
+        >
+          {isPaused ? '▶' : '⏸'}
+        </button>
+        <div className="timer">{formatTime(time)}</div>
+        <button className="hint-button">?</button>
+      </div>
 
-      <Panel id='first_lvl'>
-        <PanelHeader>Уровень 1</PanelHeader>
-        <FirstLevel />
-      </Panel>
+      {/* Игровое поле */}
+      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className="game-field">
+          {/* Корзинки */}
+          <Basket type="yellow" items={yellowBasket} />
+          <Basket type="black" items={blackBasket} />
 
-      <Panel id='second_lvl'>
-        <PanelHeader>Уровень 2</PanelHeader>
-        <SecondLevel />
-      </Panel>
-    </View>
+          {/* Доступные предметы */}
+          <div className="items-container">
+            {items.map((item) => (
+              <DraggableItem key={item.id} item={item} />
+            ))}
+          </div>
+        </div>
+
+        <DragOverlay>
+          {activeId ? (
+            <img
+              src={items.find((i) => i.id === activeId)?.img}
+              className="dragged-item"
+              alt="item"
+            />
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+    </div>
+  );
+};
+
+const DraggableItem: FC<{ item: DraggableItem }> = ({ item }) => {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: item.id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className="item"
+      style={{ transform: CSS.Translate.toString(transform) }}
+      {...listeners}
+      {...attributes}
+    >
+      <img src={item.img} alt="item" className="item-image" />
+    </div>
+  );
+};
+
+const Basket: FC<{ type: ItemType; items: DraggableItem[] }> = ({ type, items }) => {
+  const { setNodeRef } = useDroppable({ id: `${type}-basket` });
+  const basketImg = type === 'yellow' 
+    ? 'src/assets/baskets/yellow-basket.svg' 
+    : 'src/assets/baskets/black-basket.svg';
+
+  return (
+    <div ref={setNodeRef} className={`basket ${type}-basket`}>
+      <img src={basketImg} alt={`${type} basket`} className="basket-image" />
+      <div className="items-in-basket">
+        {items.map((item) => (
+          <img key={item.id} src={item.img} alt="item" className="item-in-basket" />
+        ))}
+      </div>
+    </div>
   );
 };

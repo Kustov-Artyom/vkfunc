@@ -1,0 +1,17 @@
+/* Achievements.css */
+.Achievements {
+  min-height: calc(100vh - 56px);
+  background: #f0f0f0;
+  padding: 20px;
+}
+
+.Achievements ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.Achievements li {
+  margin-bottom: 8px;
+  font-size: 15px;
+}
