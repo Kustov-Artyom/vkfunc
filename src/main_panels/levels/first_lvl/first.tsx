@@ -8,7 +8,7 @@ import {
   useDraggable,
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import './second.css';
+import './first.css';
 
 type ItemType = 'yellow' | 'black';
 
@@ -19,12 +19,12 @@ interface DraggableItem {
 }
 
 const initialItems: DraggableItem[] = [
-  { id: '1', type: 'black', img: 'srс/assets/lib/items/1.jpg' },
-  { id: '2', type: 'black', img: 'src/assets/lib/items/4.jpg' },
-  { id: '3', type: 'yellow', img: 'src/assets/lib/items/3.jpg' },
-  { id: '4', type: 'black', img: 'src/assets/lib/items/2.jpg' },
-  { id: '5', type: 'yellow', img: 'src/assets/lib/items/5.jpg' },
-  { id: '6', type: 'yellow', img: 'src/assets/lib/items/6.jpg' },
+  { id: '1', type: 'black', img: 'src/assets/lib/items/hat.jpg' },
+  { id: '2', type: 'black', img: 'src/assets/lib/items/flag.png' },
+  { id: '3', type: 'yellow', img: 'src/assets/lib/items/gold.png' },
+  { id: '4', type: 'black', img: 'src/assets/lib/items/hook.png' },
+  { id: '5', type: 'yellow', img: 'src/assets/lib/items/bananas.png' },
+  { id: '6', type: 'yellow', img: 'src/assets/lib/items/money.png' },
 ];
 
 export const FirstLevel: FC = () => {
@@ -133,8 +133,8 @@ const DraggableItem: FC<{ item: DraggableItem }> = ({ item }) => {
 const Basket: FC<{ type: ItemType; items: DraggableItem[] }> = ({ type, items }) => {
   const { setNodeRef } = useDroppable({ id: `${type}-basket` });
   const basketImg = type === 'yellow' 
-    ? 'src/assets/baskets/yellow-basket.png' 
-    : 'src/assets/baskets/black-basket.png';
+    ? 'src/assets/lib/baskets/yellow-basket.png' 
+    : 'src/assets/lib/baskets/black-basket.png';
 
   return (
     <div ref={setNodeRef} className={`basket ${type}-basket`}>
