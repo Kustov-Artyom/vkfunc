@@ -1,3 +1,4 @@
+
 import React, { FC, useState, useEffect, useCallback } from 'react';
 import { useDroppable, useDraggable, DndContext, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { Panel, PanelHeader, Div } from '@vkontakte/vkui';
@@ -5,8 +6,16 @@ import { Icon24ChevronLeft } from '@vkontakte/icons';
 import { CSS } from '@dnd-kit/utilities';
 import './Game.css';
 
-import pauseIcon from '../assets/pause.svg';
-import hintIcon from '../assets/hint.svg';
+import pauseIcon from '/src/assets/pause.svg';
+import hintIcon from '/src/assets/hint.svg';
+import pirateHat from '../assets/items/pirate-hat.svg';
+import banana from '../assets/items/banana.svg';
+import flag from '../assets/items/flag.svg';
+import money from '../assets/items/money.svg';
+import telescope from '../assets/items/telescope.svg';
+import crystal from '../assets/items/crystal.svg';
+import yellowBasket from '../assets/baskets/yellow-basket.svg';
+import blackBasket from '../assets/baskets/black-basket.svg';
 
 type ItemType = 'yellow' | 'black';
 
@@ -23,12 +32,12 @@ interface GameProps {
 }
 
 const initialItems: DraggableItem[] = [
-  { id: '1', type: 'black', img: 'src/assets/items/pirate-hat.svg' },
-  { id: '2', type: 'yellow', img: 'src/assets/items/banana.svg' },
-  { id: '3', type: 'black', img: 'src/assets/items/flag.svg' },
-  { id: '4', type: 'yellow', img: 'src/assets/items/money.svg' },
-  { id: '5', type: 'black', img: 'src/assets/items/telescope.svg' },
-  { id: '6', type: 'yellow', img: 'src/assets/items/crystal.svg' },
+  { id: '1', type: 'black', img: pirateHat },
+  { id: '2', type: 'yellow', img: banana },
+  { id: '3', type: 'black', img: flag },
+  { id: '4', type: 'yellow', img: money },
+  { id: '5', type: 'black', img: telescope },
+  { id: '6', type: 'yellow', img: crystal },
 ];
 
 const Game: FC<GameProps> = ({ currentLevel, openModal, onLevelComplete }) => {
@@ -160,8 +169,8 @@ const Basket: FC<{ type: ItemType; items: DraggableItem[] }> = ({ type, items })
 
   const basketImg =
     type === 'yellow'
-      ? 'src/assets/baskets/yellow-basket.svg'
-      : 'src/assets/baskets/black-basket.svg';
+      ? yellowBasket
+      : blackBasket;
 
   return (
     <div ref={setNodeRef} className="basket">

@@ -13,6 +13,10 @@ import level6 from '../assets/level6.svg';
 import level7 from '../assets/level7.svg';
 import level8 from '../assets/level8.svg';
 import level9 from '../assets/level9.svg';
+import level10 from '../assets/level10.svg';
+import level11 from '../assets/level11.svg';
+import level12 from '../assets/level12.svg';
+
 
 interface LevelsProps {
   coins: number;
@@ -25,11 +29,11 @@ const Levels: React.FC<LevelsProps> = ({ coins, setCurrentLevel, openModal }) =>
   const openSettings = () => openModal('settings');
 
   // Массив иконок, уровни от 9 к 1 (сверху вниз)
-  const icons = [level9, level8, level7, level6, level5, level4, level3, level2, level1];
+  const icons = [level12, level11, level10, level9, level8, level7, level6, level5, level4, level3, level2, level1];
 
   const handleLevelClick = (idx: number) => {
     // idx=0 => level9, idx=8 => level1
-    const realLevel = 9 - idx;
+    const realLevel = 12 - idx;
     setCurrentLevel(realLevel);
     window.location.hash = '/game';
   };
@@ -42,21 +46,23 @@ const Levels: React.FC<LevelsProps> = ({ coins, setCurrentLevel, openModal }) =>
         Уровни
       </PanelHeader>
       <Div className="LevelsContainer">
-        <button className="settings-btn-levels" onClick={openSettings} aria-label="Настройки" />
-        <div className="coin-counter-levels">
-          <span className="coin-count-levels">{coins}</span>
-        </div>
-        <div className="levels-path">
-          {icons.map((icon, idx) => (
-            <div
-              key={idx}
-              className={`level-btn-loc level-${idx}`}
-              onClick={() => handleLevelClick(idx)}
-            >
-              <img src={icon} alt={`Уровень ${9 - idx}`} />
-            </div>
-          ))}
-        </div>
+        <Div className="content">
+          <button className="settings-btn-levels" onClick={openSettings} aria-label="Настройки" />
+          <div className="coin-counter-levels">
+            <span className="coin-count-levels">{coins}</span>
+          </div>
+          <div className="levels-path">
+            {icons.map((icon, idx) => (
+              <div
+                key={idx}
+                className={`level-btn-loc level-${idx}`}
+                onClick={() => handleLevelClick(idx)}
+              >
+                <img src={icon} alt={`Уровень ${12 - idx}`} />
+              </div>
+            ))}
+          </div>
+        </Div>
       </Div>
     </Panel>
   );

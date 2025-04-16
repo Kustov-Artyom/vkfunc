@@ -21,6 +21,13 @@ import Plot from './panels/Plot';
 import Achievements from './panels/Achievements';
 import Shop from './panels/Shop';
 
+import coinVictory from '/src/assets/coin.svg';
+import againVictory from '/src/assets/again.svg';
+import startVictory from '/src/assets/start.svg';
+import shareVictory from '/src/assets/share.svg';
+
+
+
 // Если у нас всё же остался Victory экран, импортируй
 import Victory from './panels/Victory';
 
@@ -115,7 +122,7 @@ export const App = () => {
   // Модалка сюжета (story) при первом входе
   const renderStoryModal = () => (
     <div className="custom-modal">
-      <div className="custom-modal-content" style={{ backgroundImage: `url('src/assets/wooden-modal-menu.svg')` }}>
+      <div className="custom-modal-content">
         <button className="modal-close-btn" onClick={closeModal} />
         <p style={{ color: '#954B25', textAlign: 'center', fontSize: 16, fontWeight: 700, margin: '10px 30px' }}>
           Привет!
@@ -135,7 +142,7 @@ export const App = () => {
   // Модалка паузы
   const renderPauseModal = () => (
     <div className="custom-modal">
-      <div className="custom-modal-content" style={{ backgroundImage: `url('src/assets/wooden-modal-menu.svg')` }}>
+      <div className="custom-modal-content">
         <button className="modal-close-btn" onClick={closeModal} />
         <button className="menu-button" onClick={closeModal}>
           Продолжить
@@ -160,7 +167,7 @@ export const App = () => {
   // Подтверждение "Начать с начала?"
   const renderConfirmRestart = () => (
     <div className="custom-modal">
-      <div className="custom-modal-content" style={{ backgroundImage: `url('src/assets/wooden-modal-menu-small.svg')`, width: '295px', height: '290px' }}>
+      <div className="custom-modal-content-small" style={{ width: '295px', height: '290px' }}>
         <button className="modal-close-btn" onClick={() => openModal('pause')} />
         <p style={{ color: '#954B25', textAlign: 'center', fontSize: 24, fontWeight: 'bold', margin: 20 }}>Начать сначала?</p>
         <p style={{ marginBottom: 20, textAlign: 'center', color: '#954B25', margin: 20 }}>Прогресс текущего уровня будет утерян.</p>
@@ -178,7 +185,7 @@ export const App = () => {
   // Подтверждение выхода "Вы точно хотите выйти из игры?"
   const renderConfirmMenu = () => (
     <div className="custom-modal">
-      <div className="custom-modal-content" style={{ backgroundImage: `url('src/assets/wooden-modal-menu-small.svg')`, width: '295px', height: '290px' }}>
+      <div className="custom-modal-content-small" style={{ width: '295px', height: '290px' }}>
         <button className="modal-close-btn" onClick={() => openModal('pause')} />
         <p style={{ color: '#954B25', textAlign: 'center', fontSize: 24, fontWeight: 'bold', margin: 20 }}>Вы точно хотите выйти из игры?</p>
         <p style={{ marginBottom: 20, textAlign: 'center', color: '#954B25', margin: 20 }}>Прогресс уровня будет утерян!</p>
@@ -196,7 +203,7 @@ export const App = () => {
   // Подтверждение "Сбросить все уровни?"
   const renderConfirmReset = () => (
     <div className="custom-modal">
-      <div className="custom-modal-content" style={{ backgroundImage: `url('src/assets/wooden-modal-menu-small.svg')`, width: '295px', height: '290px' }}>
+      <div className="custom-modal-content-small" style={{ width: '295px', height: '290px' }}>
         <button className="modal-close-btn" onClick={() => openModal('settings')} />
         <p style={{ color: '#954B25', textAlign: 'center', fontSize: 24, fontWeight: 'bold', margin: 20 }}>Сбросить все уровни?</p>
         <p style={{ marginBottom: 20, textAlign: 'center', color: '#954B25', margin: 20 }}>Вы точно хотите сбросить весь прогресс?</p>
@@ -214,17 +221,17 @@ export const App = () => {
   // Модалка "Настройки" 
   const renderSettings = () => (
     <div className="custom-modal">
-      <div className="custom-modal-content" style={{ backgroundImage: `url('src/assets/wooden-modal-menu.svg')` }}>
+      <div className="custom-modal-content">
         <button className="modal-close-btn" onClick={() => {
           closeModal();
           // Вернёмся в паузу, если мы были из паузы
           // openModal('pause');
         }} />
         <div className='container-menu-button-circle'>
-          <button className="menu-button-circle" style={{ background: `url('src/assets/soundAndMusic.svg') center center no-repeat` }}>
+          <button className="menu-button-circle-music">
             <p style={{ color: '#954B25', textAlign: 'center', fontSize: 12, fontWeight: 'bold', marginTop: 70}}>Звук и музыка</p>
           </button>
-          <button className="menu-button-circle" style={{ background: `url('src/assets/notifications.svg') center center no-repeat` }}>
+          <button className="menu-button-circle-notifications">
             <p style={{ color: '#954B25', textAlign: 'center', fontSize: 12, fontWeight: 'bold', marginTop: 70}}>Уведомления</p>
           </button>
         </div>
@@ -240,26 +247,26 @@ export const App = () => {
   // Пример модалки победы (можно было отдельным компонентом),
   const renderVictoryModal = () => (
     <div className="custom-modal">
-      <div className="custom-modal-content" style={{ backgroundImage: `url('src/assets/wooden-modal-menu-small.svg')`, width: '295px', height: '290px' }}>
+      <div className="custom-modal-content-small" style={{ width: '295px', height: '290px' }}>
         <button className="modal-close-btn" onClick={closeModal} />
         <p style={{ color: '#954B25', textAlign: 'center', fontSize: 20, fontWeight: 'bold', marginBottom: 12 }}>
           Уровень пройден!
         </p>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 16 }}>
-          <img src="src/assets/coin.svg" alt="coin" style={{ width: 32, height: 32, marginRight: 8 }} />
+          <img src={coinVictory} alt="coin" style={{ width: 32, height: 32, marginRight: 8 }} />
           <span style={{ color: '#ff9800', fontSize: 24, fontWeight: 'bold' }}>+20</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginBottom: 16 }}>
-          <img src="src/assets/again.svg" alt="Повторить" style={{ width: 40, height: 40, cursor: 'pointer' }} onClick={() => {
+          <img src={againVictory} alt="Повторить" style={{ width: 40, height: 40, cursor: 'pointer' }} onClick={() => {
             closeModal();
             window.location.hash = '/game';
           }} />
-          <img src="src/assets/start.svg" alt="Далее" style={{ width: 40, height: 40, cursor: 'pointer' }} onClick={() => {
+          <img src={startVictory} alt="Далее" style={{ width: 40, height: 40, cursor: 'pointer' }} onClick={() => {
             closeModal();
             // Открыть сюжет / вернуться на Levels
             window.location.hash = '/plot';
           }} />
-          <img src="src/assets/share.svg" alt="Поделиться" style={{ width: 40, height: 40, cursor: 'pointer' }} onClick={() => {
+          <img src={shareVictory} alt="Поделиться" style={{ width: 40, height: 40, cursor: 'pointer' }} onClick={() => {
             bridge.send('VKWebAppShare', {}).catch(console.error);
           }} />
         </div>

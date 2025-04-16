@@ -1,7 +1,7 @@
 /* src/panels/Plot.css */
 .Plot {
     min-height: calc(100vh - 100px);
-    background: url('../assets/plot-background.svg') no-repeat center center;
+    background: url('/src/assets/plot-background.svg') no-repeat center center;
     background-size: cover;
     padding: 20px;
     display: flex;
@@ -11,7 +11,7 @@
   }
   
   .plot-text {
-    background: url('../assets/wooden-modal-menu-small.svg') no-repeat center center;
+    background: url('/src/assets/wooden-modal-menu-small.svg') no-repeat center center;
     position: relative;
     width: 295px;
     height: 290px;
@@ -38,7 +38,7 @@
     right: 20px;
     width: 32px;
     height: 32px;
-    background: url('src/assets/close.svg') no-repeat center center;
+    background: url('/src/assets/close.svg') no-repeat center center;
     background-size: contain;
     border: none;
     cursor: pointer;

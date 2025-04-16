@@ -12,7 +12,7 @@ body, #root {
   right: 10px;
   width: 32px;
   height: 32px;
-  background: url('src/assets/close.svg') no-repeat center center;
+  background: url('/src/assets/close.svg') no-repeat center center;
   background-size: contain;
   border: none;
   cursor: pointer;
@@ -34,7 +34,6 @@ body, #root {
   position: relative;
   width: 280px;
   height: 380px;
-  background-size: cover;
   background-position: center;
   padding: 20px;
   /* Расположим flex-колонку */
@@ -42,6 +41,21 @@ body, #root {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background: url(/src/assets/wooden-modal-menu.svg) no-repeat center center;
+}
+
+.custom-modal-content-small {
+  position: relative;
+  width: 280px;
+  height: 380px;
+  background-position: center;
+  padding: 20px;
+  /* Расположим flex-колонку */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: url(/src/assets/wooden-modal-menu-small.svg) no-repeat center center;
 }
 
 /* Кнопка из макета (градиент, бордюр, тени) */
@@ -83,7 +97,7 @@ body, #root {
   background-image: linear-gradient(#FCF80D, #F99F1E);
 }
 
-.container-menu-button-circle{
+.container-menu-button{
   display: flex;
   flex-direction: row;
   justify-content: space-around;
@@ -91,8 +105,16 @@ body, #root {
   width: 200px;
 }
 
-.menu-button-circle{
+.menu-button-circle-music{
   border: none;
   width: 100px;
   height: 72px;
+  background: url(/src/assets/soundAndMusic.svg) no-repeat center center;
+}
+
+.menu-button-circle-notifications{
+  border: none;
+  width: 100px;
+  height: 72px;
+  background: url(/src/assets/notifications.svg) no-repeat center center;
 }

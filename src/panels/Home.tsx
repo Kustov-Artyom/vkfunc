@@ -20,11 +20,11 @@ interface DraggableItem {
 }
 
 const initialItems: DraggableItem[] = [
-  { id: '1', type: 'black', img: 'src/assets/items/pirate-hat.svg' },
-  { id: '2', type: 'yellow', img: 'src/assets/items/banana.svg' },
-  { id: '3', type: 'black', img: 'src/assets/items/flag.svg' },
-  { id: '4', type: 'yellow', img: 'src/assets/items/money.svg' },
-  { id: '6', type: 'yellow', img: 'src/assets/items/crystal.svg' },
+  { id: '1', type: 'black', img: '/src/assets/items/pirate-hat.svg' },
+  { id: '2', type: 'yellow', img: '/src/assets/items/banana.svg' },
+  { id: '3', type: 'black', img: '/src/assets/items/flag.svg' },
+  { id: '4', type: 'yellow', img: '/src/assets/items/money.svg' },
+  { id: '6', type: 'yellow', img: '/src/assets/items/crystal.svg' },
 ];
 
 export const Home: FC = () => {
@@ -133,8 +133,8 @@ const DraggableItem: FC<{ item: DraggableItem }> = ({ item }) => {
 const Basket: FC<{ type: ItemType; items: DraggableItem[] }> = ({ type, items }) => {
   const { setNodeRef } = useDroppable({ id: `${type}-basket` });
   const basketImg = type === 'yellow' 
-    ? 'src/assets/baskets/yellow-basket.svg' 
-    : 'src/assets/baskets/black-basket.svg';
+    ? '/src/assets/baskets/yellow-basket.svg' 
+    : '/src/assets/baskets/black-basket.svg';
 
   return (
     <div ref={setNodeRef} className={`basket ${type}-basket`}>
