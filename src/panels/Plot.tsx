@@ -1,6 +1,6 @@
-// src/panels/Plot.tsx
+// src\panels\Plot.tsx
 import React from 'react';
-import { Panel, PanelHeader, Div, Button } from '@vkontakte/vkui';
+import { Panel, PanelHeader, Div } from '@vkontakte/vkui';
 import './Plot.css';
 
 interface PlotProps {
@@ -11,7 +11,7 @@ interface PlotProps {
 const Plot: React.FC<PlotProps> = ({ currentLevel, setCurrentLevel }) => {
   const handleContinue = () => {
     // Допустим, если уровней 9, после 9-го возвращаем на главное меню
-    if (currentLevel >= 9) {
+    if (currentLevel >= 3) {
       window.location.hash = '/';
     } else {
       // идём на следующий уровень

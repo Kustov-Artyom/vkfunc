@@ -1,3 +1,4 @@
+// src\panels\Shop.tsx
 import React from 'react';
 import { Panel, PanelHeader, Button, Div } from '@vkontakte/vkui';
 import { Icon24ChevronLeft } from '@vkontakte/icons';

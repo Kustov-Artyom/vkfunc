@@ -1,4 +1,4 @@
-// /src/eruda.ts
+// src\eruda.ts
 
 import eruda from 'eruda';
 

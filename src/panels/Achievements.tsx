@@ -1,3 +1,4 @@
+//\src\panels\Achievements.tsx
 import React from 'react';
 import { Panel, PanelHeader, Div } from '@vkontakte/vkui';
 import { Icon24ChevronLeft } from '@vkontakte/icons';

@@ -1,4 +1,4 @@
-// src/panels/Loading.tsx
+// src\panels\Loading.tsx
 import React, { useEffect, useState } from 'react';
 import { Panel, PanelHeader, Div, Spinner } from '@vkontakte/vkui';
 import './Loading.css';

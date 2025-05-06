@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { Panel, PanelHeader, Div } from '@vkontakte/vkui';
 import './MainMenu.css';
+import type { ModalId } from '../App';  
 
 interface MainMenuProps {
   coins: number;
-  setCoins: (val: number) => void;
-  openModal: (id: string) => void;
+  openModal: (id: ModalId) => void;
 }
 
 const MainMenu: React.FC<MainMenuProps> = ({ coins, openModal }) => {

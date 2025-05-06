@@ -1,17 +1,16 @@
-/* Убираем scroll на body, если хочешь на всех экранах */
+/* src\App.css */
 body, #root {
   margin: 0;
   padding: 0;
-  overflow: hidden; /* чтобы вообще не было скролла */
+  overflow: hidden; 
 }
 
-/* Кнопка крестика */
 .modal-close-btn {
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 32px;
-  height: 32px;
+  width: 50px;
+  height: 50px;
   background: url('/src/assets/close.svg') no-repeat center center;
   background-size: contain;
   border: none;
@@ -19,7 +18,6 @@ body, #root {
   z-index: 999;
 }
 
-/* Кастомная обертка модалки */
 .custom-modal {
   position: fixed;
   z-index: 1000;
@@ -36,7 +34,6 @@ body, #root {
   height: 380px;
   background-position: center;
   padding: 20px;
-  /* Расположим flex-колонку */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -50,7 +47,6 @@ body, #root {
   height: 380px;
   background-position: center;
   padding: 20px;
-  /* Расположим flex-колонку */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -58,7 +54,6 @@ body, #root {
   background: url(/src/assets/wooden-modal-menu-small.svg) no-repeat center center;
 }
 
-/* Кнопка из макета (градиент, бордюр, тени) */
 .menu-button {
   width: 80px;
   height: 48px;
@@ -101,12 +96,12 @@ body, #root {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
-  height: 120px;
   width: 200px;
 }
 
 .menu-button-circle-music{
   border: none;
+  cursor: pointer;
   width: 100px;
   height: 72px;
   background: url(/src/assets/soundAndMusic.svg) no-repeat center center;
@@ -114,7 +109,20 @@ body, #root {
 
 .menu-button-circle-notifications{
   border: none;
+  cursor: pointer;
   width: 100px;
   height: 72px;
   background: url(/src/assets/notifications.svg) no-repeat center center;
+}
+
+.container-menu-button-circle {
+  margin-bottom: 20px;
+}
+
+.parrot {
+  background: url(/src/assets/parrot.svg) no-repeat bottom right;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  display: block;
 }

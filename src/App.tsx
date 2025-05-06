@@ -1,347 +1,400 @@
-// src/App.tsx
-
-import { useState, useEffect, useRef, ReactNode } from 'react';
-import bridge, { UserInfo } from '@vkontakte/vk-bridge';
+//src\App.tsx
+import { useState, useEffect, useRef, ReactNode, useCallback  } from 'react';
+import bridge from '@vkontakte/vk-bridge';
 import {
-  View,
-  Panel,
-  SplitLayout,
-  SplitCol,
-  ScreenSpinner,
+  View, Panel, SplitLayout, SplitCol, ScreenSpinner,
 } from '@vkontakte/vkui';
 import { useActiveVkuiLocation } from '@vkontakte/vk-mini-apps-router';
-import './App.css';  // Глобальные стили
+import './App.css';
 import { DEFAULT_VIEW_PANELS } from './routes';
 
-import MainMenu from './panels/MainMenu';
-import Loading from './panels/Loading';
-import Levels from './panels/Levels';
-import Game from './panels/Game';
-import Plot from './panels/Plot';
+import MainMenu     from './panels/MainMenu';
+import Loading      from './panels/Loading';
+import Levels       from './panels/Levels';
+import Game         from './panels/Game';
+import Plot         from './panels/Plot';
 import Achievements from './panels/Achievements';
-import Shop from './panels/Shop';
+import Shop         from './panels/Shop';
 
-import coinVictory from '/src/assets/coin.svg';
+import coinVictory  from '/src/assets/coin.svg';
 import againVictory from '/src/assets/again.svg';
 import startVictory from '/src/assets/start.svg';
 import shareVictory from '/src/assets/share.svg';
 
+const COINS_STORAGE_KEY    = 'coins';
+const PROGRESS_STORAGE_KEY = 'progress';
+const COMPLETED_LEVELS_KEY    = 'completed_levels';
 
-
-// Если у нас всё же остался Victory экран, импортируй
-import Victory from './panels/Victory';
-
-// Константы
-const COINS_STORAGE_KEY = 'coins';
-
-// Тип идентификаторов модалок
-type ModalId = 'story' | 'pause' | 'settings' | 'confirmRestart' | 'confirmMenu' | 'confirmReset' | 'victoryModal' | null;
+export type ModalId =
+  | 'story' | 'pause' | 'settings'
+  | 'confirmRestart' | 'confirmMenu' | 'confirmReset'
+  | 'victoryModal' | 'confirmRestartGame'
+  | null;
 
 export const App = () => {
-  const { panel: activePanel = DEFAULT_VIEW_PANELS.LOADING } = useActiveVkuiLocation();
+  /* текущее положение в роутере */
+  const { panel: activePanel = DEFAULT_VIEW_PANELS.MAIN } = useActiveVkuiLocation();
 
-  const [popout, setPopout] = useState<ReactNode | null>(<ScreenSpinner size="large" />);
-  const [fetchedUser, setFetchedUser] = useState<UserInfo | undefined>();
-  const [coins, setCoins] = useState<number>(0);
-  const [currentLevel, setCurrentLevel] = useState<number>(1);
-
-  // Кастомная система модальных окон
+  /* ── состояния ─────────────────────────────── */
+  const [popout, setPopout] = useState<ReactNode>(<ScreenSpinner size="large" />);
+  const [coins, setCoins] = useState(0);
+  const [currentLevel, setCurrentLevel] = useState(1);
+  const [unlockedLevel, setUnlockedLevel] = useState(1);
+  const [completedLevels, setCompletedLevels] = useState<number[]>([]);
+  const [bestTimes, setBestTimes] = useState<Record<number, number>>({});
   const [activeModal, setActiveModal] = useState<ModalId>(null);
+  const [restartKey, setRestartKey] = useState(0);
+  const [lastAwarded, setLastAwarded] = useState<boolean>(false);
 
-  // Флаг для возврата к паузе, когда уходим в настройки
   const returnToPause = useRef(false);
 
-  // Состояние загрузки (чтобы показывать <Loading /> или <ScreenSpinner />)
-  const [isLoading, setIsLoading] = useState(false);
-
+  /* ── инициализация ─────────────────────────── */
   useEffect(() => {
     (async () => {
       bridge.send('VKWebAppInit');
-      const userData = await bridge.send('VKWebAppGetUserInfo');
-      setFetchedUser(userData);
-      setPopout(null);
-
-      // Загрузка монет
-      const storageGet = await bridge.send('VKWebAppStorageGet', {
-        keys: [COINS_STORAGE_KEY],
+      const { keys } = await bridge.send('VKWebAppStorageGet', {
+        keys: [COINS_STORAGE_KEY, PROGRESS_STORAGE_KEY, COMPLETED_LEVELS_KEY],
       });
-      const coinsValue = storageGet?.keys?.[0]?.value;
-      if (coinsValue) {
-        setCoins(Number(coinsValue));
-      } else {
-        setCoins(0);
-        await bridge.send('VKWebAppStorageSet', { key: COINS_STORAGE_KEY, value: '0' });
-      }
-
-      // Имитируем задержку 500 мс, чтобы показать popout хотя бы чуть
-      await new Promise(r => setTimeout(r, 500));
+      keys.forEach(({ key, value }) => {
+        if (key === COINS_STORAGE_KEY)    setCoins(Number(value || 0));
+        if (key === PROGRESS_STORAGE_KEY) setUnlockedLevel(Math.max(1, Number(value || 1)));
+      });
+      await new Promise(r => setTimeout(r, 300));
       setPopout(null);
+      const completedRaw = keys.find(k => k.key === COMPLETED_LEVELS_KEY)?.value;
+      if (completedRaw) setCompletedLevels(JSON.parse(completedRaw));
     })();
   }, []);
 
-  // При первом входе показать сюжет
+  /* ── показываем сюжет при первом входе ─────── */
   useEffect(() => {
-    const visited = localStorage.getItem('firstVisit');
-    if (!visited) {
-      setActiveModal('story'); // открыть модалку сюжета
+    if (!localStorage.getItem('firstVisit')) {
+      setActiveModal('story');
       localStorage.setItem('firstVisit', 'true');
     }
   }, []);
 
-  // Функции управления модалками
-  const openModal = (m: ModalId) => setActiveModal(m);
+  /* ── helpers ───────────────────────────────── */
+  const openModal  = (m: ModalId) => setActiveModal(m);
   const closeModal = () => setActiveModal(null);
 
-  // Сброс прогресса
   const resetAll = async () => {
+    /* монеты и прогресс */
     setCoins(0);
-    localStorage.removeItem('firstVisit');
-    await bridge.send('VKWebAppStorageSet', { key: COINS_STORAGE_KEY, value: '0' });
-    // Можно сбросить currentLevel, если нужно
+    setUnlockedLevel(1);
     setCurrentLevel(1);
-    // Вернуть на главный экран
+  
+    /* обнуляем «пройденные» и лучшие времена */
+    setCompletedLevels([]);
+    setBestTimes({});
+  
+    await Promise.all([
+      bridge.send('VKWebAppStorageSet', { key: COINS_STORAGE_KEY,        value: '0'   }),
+      bridge.send('VKWebAppStorageSet', { key: PROGRESS_STORAGE_KEY,     value: '1'   }),
+      bridge.send('VKWebAppStorageSet', { key: COMPLETED_LEVELS_KEY,     value: '[]'  }),
+    ]);
+  
     window.location.hash = '/';
   };
 
-  // useEffect на hashchange: если вернулись в #game и returnToPause=true, показываем паузу
+  /* если вернулись из настроек -> пауза */
   useEffect(() => {
-    const handleHashChange = () => {
+    const h = () => {
       if (window.location.hash === '#game' && returnToPause.current) {
-        openModal('pause');
-        returnToPause.current = false;
+        openModal('pause'); returnToPause.current = false;
       }
     };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('hashchange', h);
+    return () => window.removeEventListener('hashchange', h);
   }, []);
 
-
-
-  // РЕНДЕРЫ КАСТОМНЫХ МОДАЛОК:
-
-  // Модалка сюжета (story) при первом входе
-  const renderStoryModal = () => (
-    <div className="custom-modal">
-      <div className="custom-modal-content">
-        <button className="modal-close-btn" onClick={closeModal} />
-        <p style={{ color: '#954B25', textAlign: 'center', fontSize: 16, fontWeight: 700, margin: '10px 30px' }}>
-          Привет!
-          <br /><br />
-          Меня зовут Финн, я юнга на пиратском корабле.
-          <br /><br />
-          Помоги мне найти сундук с сокровищами на этом острове,
-          чтобы получить звание помощника капитана.
-          <br /><br />
-          Сортируй предметы и продвигайся в глубь острова,
-          чтобы найти сокровища!
-        </p>
-      </div>
-    </div>
+  const finishLevel = useCallback(
+    (level: number, timeSec: number) => {
+  
+      /* === 0. определяем, первое ли это прохождение === */
+      const firstTime = !completedLevels.includes(level);
+      /* 1. монеты – только при первом прохождении */
+      if (firstTime) {
+        const newCoins = coins + 20;
+        setCoins(newCoins);
+        bridge.send('VKWebAppStorageSet', {
+          key: COINS_STORAGE_KEY, value: String(newCoins),
+        });
+  
+        /* сохраняем уровень в список пройденных */
+        const newCompleted = [...completedLevels, level];
+        setCompletedLevels(newCompleted);
+        bridge.send('VKWebAppStorageSet', {
+          key: COMPLETED_LEVELS_KEY, value: JSON.stringify(newCompleted),
+        });
+      }
+  
+      /* 2. лучшее время  … (оставляем без изменений) */
+      const oldBest = bestTimes[level] ?? Infinity;
+      if (timeSec < oldBest) {
+        const newBestTimes = { ...bestTimes, [level]: timeSec };
+        setBestTimes(newBestTimes);
+        bridge.send('VKWebAppStorageSet', {
+          key: `best_time_${level}`, value: String(timeSec),
+        });
+      }
+  
+      /* 3. открываем следующий уровень  … (как было) */
+      if (level === unlockedLevel && unlockedLevel < 3) {
+        const next = unlockedLevel + 1;
+        setUnlockedLevel(next);
+        bridge.send('VKWebAppStorageSet', {
+          key: PROGRESS_STORAGE_KEY, value: String(next),
+        });
+      }
+  
+      /* 4. запоминаем, была ли награда и открываем Victory */
+      setLastAwarded(firstTime);
+      openModal('victoryModal');
+    },
+    [coins, completedLevels, bestTimes, unlockedLevel]
   );
+  
+  
 
-  // Модалка паузы
-  const renderPauseModal = () => (
-    <div className="custom-modal">
-      <div className="custom-modal-content">
-        <button className="modal-close-btn" onClick={closeModal} />
-        <button className="menu-button" onClick={closeModal}>
-          Продолжить
-        </button>
-        <button className="menu-button" onClick={() => openModal('confirmRestart')}>
-          Начать с начала
-        </button>
-        <button className="menu-button" onClick={() => openModal('confirmMenu')}>
-          На главную
-        </button>
-        <button className="menu-button" onClick={() => {
-          closeModal();
-          returnToPause.current = true;
-          openModal('settings')
-        }}>
-          Настройки
-        </button>
-      </div>
-    </div>
-  );
-
-  // Подтверждение "Начать с начала?"
-  const renderConfirmRestart = () => (
-    <div className="custom-modal">
-      <div className="custom-modal-content-small" style={{ width: '295px', height: '290px' }}>
-        <button className="modal-close-btn" onClick={() => openModal('pause')} />
-        <p style={{ color: '#954B25', textAlign: 'center', fontSize: 24, fontWeight: 'bold', margin: 20 }}>Начать сначала?</p>
-        <p style={{ marginBottom: 20, textAlign: 'center', color: '#954B25', margin: 20 }}>Прогресс текущего уровня будет утерян.</p>
-        <div className="container-menu-button">
-          <button className="menu-button-yes-no" onClick={() => {
-            closeModal();
-            window.location.hash = '/game';
-          }}>Да</button>
-          <button className="menu-button-yes-no" onClick={() => openModal('pause')}>Нет</button>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Подтверждение выхода "Вы точно хотите выйти из игры?"
-  const renderConfirmMenu = () => (
-    <div className="custom-modal">
-      <div className="custom-modal-content-small" style={{ width: '295px', height: '290px' }}>
-        <button className="modal-close-btn" onClick={() => openModal('pause')} />
-        <p style={{ color: '#954B25', textAlign: 'center', fontSize: 24, fontWeight: 'bold', margin: 20 }}>Вы точно хотите выйти из игры?</p>
-        <p style={{ marginBottom: 20, textAlign: 'center', color: '#954B25', margin: 20 }}>Прогресс уровня будет утерян!</p>
-        <div className="container-menu-button">
-          <button className="menu-button-yes-no" onClick={() => {
-            closeModal();
-            window.location.hash = '/';
-          }}>Да</button>
-          <button className="menu-button-yes-no" onClick={() => openModal('pause')}>Нет</button>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Подтверждение "Сбросить все уровни?"
-  const renderConfirmReset = () => (
-    <div className="custom-modal">
-      <div className="custom-modal-content-small" style={{ width: '295px', height: '290px' }}>
-        <button className="modal-close-btn" onClick={() => openModal('settings')} />
-        <p style={{ color: '#954B25', textAlign: 'center', fontSize: 24, fontWeight: 'bold', margin: 20 }}>Сбросить все уровни?</p>
-        <p style={{ marginBottom: 20, textAlign: 'center', color: '#954B25', margin: 20 }}>Вы точно хотите сбросить весь прогресс?</p>
-        <div className="container-menu-button">
-          <button className="menu-button-yes-no" onClick={() => {
-            closeModal();
-            resetAll();
-          }}>Да</button>
-          <button className="menu-button-yes-no" onClick={() => openModal('settings')}>Нет</button>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Модалка "Настройки" 
-  const renderSettings = () => (
-    <div className="custom-modal">
-      <div className="custom-modal-content">
-        <button className="modal-close-btn" onClick={() => {
-          closeModal();
-          // Вернёмся в паузу, если мы были из паузы
-          // openModal('pause');
-        }} />
-        <div className='container-menu-button-circle'>
-          <button className="menu-button-circle-music">
-            <p style={{ color: '#954B25', textAlign: 'center', fontSize: 12, fontWeight: 'bold', marginTop: 70}}>Звук и музыка</p>
-          </button>
-          <button className="menu-button-circle-notifications">
-            <p style={{ color: '#954B25', textAlign: 'center', fontSize: 12, fontWeight: 'bold', marginTop: 70}}>Уведомления</p>
-          </button>
-        </div>
-        <button className="menu-button" style={{ marginBottom: 8 }}>Сообщить об ошибке</button>
-        <button className="menu-button" style={{ marginBottom: 8 }}>Версия без рекламы</button>
-        <button className="menu-button" style={{ marginBottom: 8 }} onClick={() => openModal('confirmReset')}>
-          Сбросить все уровни
-        </button>
-      </div>
-    </div>
-  );
-
-  // Пример модалки победы (можно было отдельным компонентом),
-  const renderVictoryModal = () => (
-    <div className="custom-modal">
-      <div className="custom-modal-content-small" style={{ width: '295px', height: '290px' }}>
-        <button className="modal-close-btn" onClick={closeModal} />
-        <p style={{ color: '#954B25', textAlign: 'center', fontSize: 20, fontWeight: 'bold', marginBottom: 12 }}>
-          Уровень пройден!
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 16 }}>
-          <img src={coinVictory} alt="coin" style={{ width: 32, height: 32, marginRight: 8 }} />
-          <span style={{ color: '#ff9800', fontSize: 24, fontWeight: 'bold' }}>+20</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginBottom: 16 }}>
-          <img src={againVictory} alt="Повторить" style={{ width: 40, height: 40, cursor: 'pointer' }} onClick={() => {
-            closeModal();
-            window.location.hash = '/game';
-          }} />
-          <img src={startVictory} alt="Далее" style={{ width: 40, height: 40, cursor: 'pointer' }} onClick={() => {
-            closeModal();
-            // Открыть сюжет / вернуться на Levels
-            window.location.hash = '/plot';
-          }} />
-          <img src={shareVictory} alt="Поделиться" style={{ width: 40, height: 40, cursor: 'pointer' }} onClick={() => {
-            bridge.send('VKWebAppShare', {}).catch(console.error);
-          }} />
-        </div>
-      </div>
-    </div>
-  );
-
-  // Рендер активной модалки
-  const renderActiveModal = () => {
-    switch (activeModal) {
-      case 'story':         return renderStoryModal();
-      case 'pause':         return renderPauseModal();
-      case 'settings':      return renderSettings();
-      case 'confirmRestart':return renderConfirmRestart();
-      case 'confirmMenu':   return renderConfirmMenu();
-      case 'confirmReset':  return renderConfirmReset();
-      case 'victoryModal':  return renderVictoryModal();
-      default:              return null;
-    }
-  };
-
+  /* ── UI ─────────────────────────────────────── */
   return (
-    <SplitLayout popout={isLoading ? <ScreenSpinner size="large" /> : popout}>
+    <SplitLayout popout={popout}>
       <SplitCol>
         <View activePanel={activePanel}>
-          <Panel id={DEFAULT_VIEW_PANELS.LOADING}>
-            <Loading />
-          </Panel>
+          {/* LOADING (остался на случай переходов) */}
+          <Panel id={DEFAULT_VIEW_PANELS.LOADING}><Loading/></Panel>
 
+          {/* MENU */}
           <Panel id={DEFAULT_VIEW_PANELS.MAIN}>
-            <MainMenu coins={coins} openModal={openModal} />
+            <MainMenu coins={coins} openModal={openModal}/>
           </Panel>
 
+          {/* LEVELS */}
           <Panel id={DEFAULT_VIEW_PANELS.LEVELS}>
             <Levels
               coins={coins}
+              unlockedLevel={unlockedLevel}
               setCurrentLevel={setCurrentLevel}
               openModal={openModal}
             />
           </Panel>
 
+          {/* GAME */}
           <Panel id={DEFAULT_VIEW_PANELS.GAME}>
             <Game
+              key={restartKey}
               currentLevel={currentLevel}
               openModal={openModal}
-              onLevelComplete={() => {
-                // Начисляем 20 монет 1 раз
-                const newCoins = coins + 20;
-                setCoins(newCoins);
-                bridge.send('VKWebAppStorageSet', { key: COINS_STORAGE_KEY, value: newCoins.toString() });
-                // Показываем victoryModal
-                openModal('victoryModal');
-              }}
+              onLevelComplete={finishLevel}
+              completedLevels={completedLevels}
+              activeModal={activeModal} 
             />
           </Panel>
 
-          <Panel id={DEFAULT_VIEW_PANELS.VICTORY}>
-            <Victory coins={coins} setCoins={setCoins} currentLevel={currentLevel} />
-          </Panel>
-
+          {/* PLOT */}
           <Panel id={DEFAULT_VIEW_PANELS.PLOT}>
-            <Plot currentLevel={currentLevel} setCurrentLevel={setCurrentLevel} />
+            <Plot currentLevel={currentLevel} setCurrentLevel={setCurrentLevel}/>
           </Panel>
 
-          <Panel id={DEFAULT_VIEW_PANELS.ACHIEVEMENTS}>
-            <Achievements />
-          </Panel>
-
-          <Panel id={DEFAULT_VIEW_PANELS.SHOP}>
-            <Shop />
-          </Panel>
+          <Panel id={DEFAULT_VIEW_PANELS.ACHIEVEMENTS}><Achievements/></Panel>
+          <Panel id={DEFAULT_VIEW_PANELS.SHOP}><Shop/></Panel>
         </View>
       </SplitCol>
 
-      {renderActiveModal()}
+      {/* ───────────────────── модалки ───────────────────── */}
+      {(() => {
+        switch (activeModal) {
+          case 'story':
+            return (
+              <div className="custom-modal">
+                <div className="custom-modal-content">
+                  <button className="modal-close-btn" onClick={closeModal} />
+                  <p style={{ color: '#954B25', textAlign: 'center', fontSize: 16, fontWeight: 700, margin: '10px 30px' }}>
+                    Привет!
+                    <br /><br />
+                    Меня зовут Финн, я юнга на пиратском корабле.
+                    <br /><br />
+                    Помоги мне найти сундук с сокровищами на этом острове,
+                    чтобы получить звание помощника капитана.
+                    <br /><br />
+                    Сортируй предметы и продвигайся в глубь острова,
+                    чтобы найти сокровища!
+                  </p>
+                </div>
+                <span className='parrot'></span>
+              </div>
+              
+            );
+
+          case 'pause':
+            return (
+              <div className="custom-modal">
+                <div className="custom-modal-content">
+                  <button className="modal-close-btn" onClick={closeModal}/>
+                  <button className="menu-button" onClick={closeModal}>Продолжить</button>
+                  <button className="menu-button" onClick={()=>openModal('confirmRestart')}>Начать с начала</button>
+                  <button className="menu-button" onClick={()=>openModal('confirmMenu')}>На главную</button>
+                  <button className="menu-button" onClick={()=>{
+                    closeModal(); returnToPause.current = true; openModal('settings');
+                  }}>Настройки</button>
+                </div>
+              </div>
+            );
+
+          case 'settings':
+            return (
+              <div className="custom-modal">
+                <div className="custom-modal-content">
+                  <button className="modal-close-btn" onClick={() => {
+                    closeModal();
+                  }} />
+                  <div className='container-menu-button-circle'>
+                    <button className="menu-button-circle-music">
+                      <p style={{ color: '#954B25', textAlign: 'center', fontSize: 12, fontWeight: 'bold', marginTop: 70}}>Звук и музыка</p>
+                    </button>
+                    <button className="menu-button-circle-notifications">
+                      <p style={{ color: '#954B25', textAlign: 'center', fontSize: 12, fontWeight: 'bold', marginTop: 70}}>Уведомления</p>
+                    </button>
+                  </div>
+                  <button className="menu-button" style={{ marginBottom: 8 }}>Сообщить об ошибке</button>
+                  <button className="menu-button" style={{ marginBottom: 8 }}>Версия без рекламы</button>
+                  <button className="menu-button" style={{ marginBottom: 8 }} onClick={() => openModal('confirmReset')}>
+                    Сбросить все уровни
+                  </button>
+                </div>
+              </div>
+            );
+
+          case 'confirmRestart':
+            return (
+              <div className="custom-modal">
+                <div className="custom-modal-content-small" style={{width:295,height:290}}>
+                  <button className="modal-close-btn" onClick={()=>openModal('pause')}/>
+                  <p style={{ color: '#954B25', textAlign: 'center', fontSize: 24, fontWeight: 'bold', margin: 20 }}>Начать сначала?</p>
+                  <p style={{ marginBottom: 20, textAlign: 'center', color: '#954B25', margin: '0 30px 20px' }}>Прогресс текущего уровня будет утерян.</p>
+                  <div className="container-menu-button">
+                    <button className="menu-button-yes-no" onClick={()=>{closeModal(); setRestartKey(k => k + 1); window.location.hash='/game';}}>Да</button>
+                    <button className="menu-button-yes-no" onClick={()=>openModal('pause')}>Нет</button>
+                  </div>
+                </div>
+              </div>
+            );
+
+          case 'confirmMenu':
+            return (
+              <div className="custom-modal">
+                <div className="custom-modal-content-small" style={{width:295,height:290}}>
+                  <button className="modal-close-btn" onClick={()=>openModal('pause')}/>
+                  <p style={{color:'#954B25',fontSize:24,fontWeight:'bold',textAlign:'center',margin:20}}>
+                    Вы точно хотите выйти из игры?
+                  </p>
+                  <p style={{textAlign:'center',color:'#954B25',margin:'0 40px 20px'}}>
+                    Прогресс уровня будет утерян!
+                  </p>
+                  <div className="container-menu-button">
+                    <button className="menu-button-yes-no" onClick={()=>{closeModal(); window.location.hash='/';}}>Да</button>
+                    <button className="menu-button-yes-no" onClick={()=>openModal('pause')}>Нет</button>
+                  </div>
+                </div>
+              </div>
+            );
+
+          case 'confirmRestartGame':
+            return (
+              <div className="custom-modal">
+                <div className="custom-modal-content-small" style={{width:295,height:290}}>
+                  <button className="modal-close-btn" onClick={()=>openModal('pause')}/>
+                  <p style={{ color: '#954B25', textAlign: 'center', fontSize: 24, fontWeight: 'bold', margin: 20 }}>Начать заново?</p>
+                  <p style={{ marginBottom: 20, textAlign: 'center', color: '#954B25', margin: '0 30px 20px' }}>Прогресс текущего уровня будет утерян.</p>
+                  <div className="container-menu-button">
+                    <button className="menu-button-yes-no" onClick={()=>{closeModal(); setRestartKey(k => k + 1); window.location.hash='/game';}}>Да</button>
+                    <button className="menu-button-yes-no" onClick={()=>openModal('victoryModal')}>Нет</button>
+                  </div>
+                </div>
+              </div>
+            );
+
+          case 'confirmReset':
+            return (
+              <div className="custom-modal">
+                <div className="custom-modal-content-small" style={{width:295,height:290}}>
+                  <button className="modal-close-btn" onClick={()=>openModal('settings')}/>
+                  <p style={{color:'#954B25',fontSize:24,fontWeight:'bold',textAlign:'center',margin:20}}>
+                    Сбросить все уровни?
+                  </p>
+                  <p style={{textAlign:'center',color:'#954B25',margin:'0 40px 20px'}}>
+                    Вы точно хотите сбросить весь прогресс?
+                  </p>
+                  <div className="container-menu-button">
+                    <button
+                      className="menu-button-yes-no"
+                      onClick={async ()=> {
+                        await  
+                        closeModal();        /* полный сброс */
+                        resetAll();
+                        openModal('story');       /* показываем сюжет снова */
+                      }}
+                    >Да</button>
+                    <button className="menu-button-yes-no" onClick={()=>openModal('settings')}>Нет</button>
+                  </div>
+                </div>
+              </div>
+            );
+
+          case 'victoryModal':
+            return (
+              <div className="custom-modal">
+                <div
+                  className="custom-modal-content-small"
+                  style={{ width: 295, height: 290 }}>
+                  <p
+                    style={{
+                      color: '#954B25',
+                      fontSize: 20,
+                      fontWeight: 700,
+                      textAlign: 'center',
+                      marginBottom: 12,
+                    }}>
+                    Уровень пройден!</p>
+                    
+                      <div style={{ display:'flex', justifyContent:'center', marginBottom:16 }}>
+                        <span style={{ color:'#954B25', fontSize:24, fontWeight:'bold'}}>+20</span>
+                        <img src={coinVictory} style={{ width:35, height:35 }} />
+                      </div>
+                    
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 20 }}>
+                    {/* AGAIN */}
+                    <img
+                      src={againVictory}
+                      style={{ width: 50, height: 50, cursor: 'pointer'}}
+                      onClick={() => openModal('confirmRestartGame')}
+                    />
+          
+                    {/* START — закрываем Victory и уходим на Plot */}
+                    <img
+                      src={startVictory}
+                      style={{ width: 50, height: 50, cursor: 'pointer' }}
+                      onClick={() => {
+                        setActiveModal(null);     
+                        setTimeout(() => { window.location.hash = '/plot'; }, 0);
+                      }}
+                    />
+          
+                    {/* SHARE */}
+                    <img
+                      src={shareVictory}
+                      style={{ width: 50, height: 50, cursor: 'pointer' }}
+                      onClick={() => bridge.send('VKWebAppShare', {}).catch(console.error)}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+
+          default: return null;
+        }
+      })()}
     </SplitLayout>
   );
 };

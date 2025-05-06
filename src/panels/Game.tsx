@@ -1,10 +1,11 @@
-
+//src\panels\Game.tsx
 import React, { FC, useState, useEffect, useCallback } from 'react';
 import { useDroppable, useDraggable, DndContext, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
-import { Panel, PanelHeader, Div } from '@vkontakte/vkui';
+import { Panel, PanelHeader } from '@vkontakte/vkui';
 import { Icon24ChevronLeft } from '@vkontakte/icons';
 import { CSS } from '@dnd-kit/utilities';
 import './Game.css';
+import type { ModalId } from '../App';  
 
 import pauseIcon from '/src/assets/pause.svg';
 import hintIcon from '/src/assets/hint.svg';
@@ -27,8 +28,10 @@ interface DraggableItem {
 
 interface GameProps {
   currentLevel: number;
-  openModal: (id: string) => void;
-  onLevelComplete: () => void;
+  openModal: (id: ModalId) => void;
+  onLevelComplete: (lvl: number, timeSec: number) => void;
+  completedLevels: number[];      //  лишь читаем
+  activeModal: ModalId;           // для паузы
 }
 
 const initialItems: DraggableItem[] = [
@@ -40,35 +43,53 @@ const initialItems: DraggableItem[] = [
   { id: '6', type: 'yellow', img: crystal },
 ];
 
-const Game: FC<GameProps> = ({ currentLevel, openModal, onLevelComplete }) => {
+const Game: FC<GameProps> = ({
+  currentLevel,
+  openModal,
+  onLevelComplete,
+  activeModal,        // ← добавили
+  completedLevels,    // ← если не нужен, можно написать _completedLevels
+}) => {
   const [items, setItems] = useState<DraggableItem[]>(initialItems);
   const [yellowBasket, setYellowBasket] = useState<DraggableItem[]>([]);
   const [blackBasket, setBlackBasket] = useState<DraggableItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const onBack = () => {
-    window.location.hash = '/levels'; // Или /main, как тебе удобнее
+    window.location.hash = '/levels'; 
   };
 
   // Таймер
   const [time, setTime] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
+  /* если открывается PAUSE / SETTINGS – ставим таймер на паузу */
   useEffect(() => {
-    const timer = setInterval(() => {
-      if (!isPaused) {
-        setTime((t) => t + 1);
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [isPaused]);
+    const mustPause = activeModal === 'pause'
+    || activeModal === 'settings'
+    || activeModal === 'confirmRestart'
+    || activeModal === 'confirmMenu'
+    || activeModal === 'confirmReset'
+    || activeModal === 'confirmRestartGame'
+    || activeModal === 'victoryModal';
+
+    setIsPaused(mustPause);
+  }, [activeModal]);
+
+  useEffect(() => {
+    let id: number | undefined;
+    if (!isPaused) {
+    id = window.setInterval(() => setTime(t => t + 1), 1000);
+    }
+    return () => { if (id) clearInterval(id); };
+    }, [isPaused]);
 
   // Проверяем, всё ли собрали
   useEffect(() => {
     if (items.length === 0) {
-      onLevelComplete();
+      onLevelComplete(currentLevel, time);
     }
-  }, [items, onLevelComplete]);
+  }, [items, currentLevel, time, onLevelComplete]);
 
   // DnD
   const handleDragStart = useCallback((event: DragStartEvent) => {
@@ -99,10 +120,7 @@ const Game: FC<GameProps> = ({ currentLevel, openModal, onLevelComplete }) => {
     return `${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const pauseGame = () => {
-    setIsPaused(!isPaused);
-    openModal('pause');
-  };
+  const pauseGame = () => openModal('pause');
 
   const hint = () => {
     alert('Подсказка: сортируй предметы по цвету корзины!');

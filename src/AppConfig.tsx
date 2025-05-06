@@ -1,4 +1,4 @@
-// /src/AppConfig.tsx
+// src\AppConfig.tsx
 
 import vkBridge, { parseURLSearchParamsForGetLaunchParams } from '@vkontakte/vk-bridge';
 import { useAdaptivity, useAppearance, useInsets } from '@vkontakte/vk-bridge-react';

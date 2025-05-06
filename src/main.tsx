@@ -1,4 +1,4 @@
-// /src/main.tsx
+// src\main.tsx
 
 import { createRoot } from 'react-dom/client';
 import vkBridge from '@vkontakte/vk-bridge';
