@@ -1,0 +1,23 @@
+/* наследуем общие правила (Game.css) */
+@import "../lvl1/level1.css";   /* те же базовые селекторы */
+
+/* меняем только уникальные классы уровня-7 */
+.lvl7-placeholders-row{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:clamp(8px,2.5vw,14px);
+  margin: 140px 0 60px;
+}
+
+.lvl7-items-container{
+  margin:0 auto;
+  max-width:540px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:clamp(10px,3vw,18px);
+  padding-bottom:env(safe-area-inset-bottom,20px);
+}
+
+/* (остальное уже есть в level1.css) */

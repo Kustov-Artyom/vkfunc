@@ -140,7 +140,7 @@ export const App = () => {
       }
   
       /* 3. открываем следующий уровень  … (как было) */
-      if (level === unlockedLevel && unlockedLevel < 3) {
+      if (level === unlockedLevel && unlockedLevel < 12) {
         const next = unlockedLevel + 1;
         setUnlockedLevel(next);
         bridge.send('VKWebAppStorageSet', {
@@ -271,7 +271,7 @@ export const App = () => {
               <div className="custom-modal">
                 <div className="custom-modal-content-small" style={{width:295,height:290}}>
                   <button className="modal-close-btn" onClick={()=>openModal('pause')}/>
-                  <p style={{ color: '#954B25', textAlign: 'center', fontSize: 24, fontWeight: 'bold', margin: 20 }}>Начать сначала?</p>
+                  <p style={{ color: '#954B25', textAlign: 'center', fontSize: 24, fontWeight: 'bold', margin: '0 30px 20px' }}>Начать сначала?</p>
                   <p style={{ marginBottom: 20, textAlign: 'center', color: '#954B25', margin: '0 30px 20px' }}>Прогресс текущего уровня будет утерян.</p>
                   <div className="container-menu-button">
                     <button className="menu-button-yes-no" onClick={()=>{closeModal(); setRestartKey(k => k + 1); window.location.hash='/game';}}>Да</button>
@@ -286,7 +286,7 @@ export const App = () => {
               <div className="custom-modal">
                 <div className="custom-modal-content-small" style={{width:295,height:290}}>
                   <button className="modal-close-btn" onClick={()=>openModal('pause')}/>
-                  <p style={{color:'#954B25',fontSize:24,fontWeight:'bold',textAlign:'center',margin:20}}>
+                  <p style={{color:'#954B25',fontSize:24,fontWeight:'bold',textAlign:'center',margin:'0 40px 20px'}}>
                     Вы точно хотите выйти из игры?
                   </p>
                   <p style={{textAlign:'center',color:'#954B25',margin:'0 40px 20px'}}>
@@ -305,7 +305,7 @@ export const App = () => {
               <div className="custom-modal">
                 <div className="custom-modal-content-small" style={{width:295,height:290}}>
                   <button className="modal-close-btn" onClick={()=>openModal('pause')}/>
-                  <p style={{ color: '#954B25', textAlign: 'center', fontSize: 24, fontWeight: 'bold', margin: 20 }}>Начать заново?</p>
+                  <p style={{ color: '#954B25', textAlign: 'center', fontSize: 24, fontWeight: 'bold', margin: '0 30px 20px' }}>Начать заново?</p>
                   <p style={{ marginBottom: 20, textAlign: 'center', color: '#954B25', margin: '0 30px 20px' }}>Прогресс текущего уровня будет утерян.</p>
                   <div className="container-menu-button">
                     <button className="menu-button-yes-no" onClick={()=>{closeModal(); setRestartKey(k => k + 1); window.location.hash='/game';}}>Да</button>
@@ -320,7 +320,7 @@ export const App = () => {
               <div className="custom-modal">
                 <div className="custom-modal-content-small" style={{width:295,height:290}}>
                   <button className="modal-close-btn" onClick={()=>openModal('settings')}/>
-                  <p style={{color:'#954B25',fontSize:24,fontWeight:'bold',textAlign:'center',margin:20}}>
+                  <p style={{color:'#954B25',fontSize:24,fontWeight:'bold',textAlign:'center',margin:'0 40px 20px'}}>
                     Сбросить все уровни?
                   </p>
                   <p style={{textAlign:'center',color:'#954B25',margin:'0 40px 20px'}}>

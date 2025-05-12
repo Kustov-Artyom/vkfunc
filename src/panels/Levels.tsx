@@ -13,14 +13,23 @@ import l2a from '../assets/levels/level2--active.svg';
 import l3  from '../assets/levels/level3.svg';
 import l3a from '../assets/levels/level3--active.svg';
 import l4 from '../assets/levels/level4.svg';
+import l4a from '../assets/levels/level4--active.svg';
 import l5 from '../assets/levels/level5.svg';
+import l5a from '../assets/levels/level5--active.svg';
 import l6 from '../assets/levels/level6.svg';
+import l6a from '../assets/levels/level6--active.svg';
 import l7 from '../assets/levels/level7.svg';
+import l7a from '../assets/levels/level7--active.svg';
 import l8 from '../assets/levels/level8.svg';
+import l8a from '../assets/levels/level8--active.svg';
 import l9 from '../assets/levels/level9.svg';
+import l9a from '../assets/levels/level9--active.svg';
 import l10 from '../assets/levels/level10.svg';
+import l10a from '../assets/levels/level10--active.svg';
 import l11 from '../assets/levels/level11.svg';
+import l11a from '../assets/levels/level11--active.svg';
 import l12 from '../assets/levels/level12.svg';
+import l12a from '../assets/levels/level12--active.svg';
 
 interface LevelsProps {
   coins: number;
@@ -30,15 +39,15 @@ interface LevelsProps {
 }
 
 const iconsAll = [
-  { lock: l12, open: l12 },
-  { lock: l11, open: l11 },
-  { lock: l10, open: l10 },
-  { lock: l9,  open: l9  },
-  { lock: l8,  open: l8  },
-  { lock: l7,  open: l7  },
-  { lock: l6,  open: l6  },
-  { lock: l5,  open: l5  },
-  { lock: l4,  open: l4  },
+  { lock: l12, open: l12a },
+  { lock: l11, open: l11a },
+  { lock: l10, open: l10a },
+  { lock: l9,  open: l9a  },
+  { lock: l8,  open: l8a  },
+  { lock: l7,  open: l7a  },
+  { lock: l6,  open: l6a  },
+  { lock: l5,  open: l5a  },
+  { lock: l4,  open: l4a  },
   { lock: l3,  open: l3a },
   { lock: l2,  open: l2a },
   { lock: l1,  open: l1a },
@@ -57,7 +66,7 @@ const Levels: React.FC<LevelsProps> = ({
 
   const handleLevelClick = (visualIdx: number) => {
     const realLevel = 12 - visualIdx;
-    if (realLevel > unlockedLevel || realLevel > 3) {
+    if (realLevel > unlockedLevel) {
       setSnack(
         <Snackbar before={<Icon16Cancel />} onClose={() => setSnack(null)}>
           Уровень пока закрыт
@@ -78,7 +87,7 @@ const Levels: React.FC<LevelsProps> = ({
         <Div className="settings-coin-fixed">
           <button
             className="settings-btn-levels"
-            style={{ zIndex: 2 }}       /* ← добавлено */
+            style={{ zIndex: 2 }}
             onClick={openSettings}
           />
           <div className="coin-counter-levels">
@@ -91,7 +100,7 @@ const Levels: React.FC<LevelsProps> = ({
           <div className="levels-path">
             {iconsAll.map((icon, idx) => {
               const realLevel = 12 - idx;
-              const isOpen = realLevel <= unlockedLevel && realLevel <= 3;
+              const isOpen = realLevel <= unlockedLevel;
               return (
                 <div
                   key={idx}

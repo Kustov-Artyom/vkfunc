@@ -2,7 +2,7 @@
 
 .LevelsContainer {
   position: relative;
-  min-height: calc(100vh - 100px);
+  min-height: calc(100vh - 80px);
   background: url('/src/assets/levels-background.svg')  top center / cover no-repeat fixed;
   overflow-y: scroll; overflow-x: hidden;
   background-attachment: local;
@@ -25,7 +25,7 @@
   position: absolute;
   top: 20px;
   right: 16px;
-  width: 96px;
+  width: 110px;
   height: 45px;
   background: url('/src/assets/coin-counter.svg') no-repeat center center;
   background-size: cover;
@@ -38,7 +38,7 @@
   color: #fff;
   font-weight: bold;
   font-size: 16px;
-  margin-left: 12px;
+  margin-left: 20px;
 }
 
 .settings-btn-levels,
@@ -56,12 +56,13 @@
   justify-content: center;
   grid-template-columns: repeat(3, 64px);
   grid-template-rows: repeat(12, 86.39px);
-  column-gap: 17px;
+  column-gap: 35px;
   row-gap: 0;
   padding-top: 100px;
   margin-bottom: 50px;
   pointer-events:none;
   padding: 100px 0 50px 0;
+  z-index: 100;
 }
 
 .levels-path::before{        /* «невидимая прокладка» */
